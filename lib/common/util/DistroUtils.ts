@@ -1,4 +1,4 @@
-import { Server } from 'helios-distribution-types'
+import { Server } from 'vis-launcher-distribution-manager'
 
 export function getMainServer(servers: Server[]): Server {
 
