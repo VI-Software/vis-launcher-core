@@ -4,7 +4,7 @@ import { MojangResponse, MojangErrorCode, decipherErrorCode, isInternalError, Mo
 import { RestResponseStatus, handleGotError } from '../../common/rest/RestResponse'
 
 export interface Agent {
-    name: 'Minecraft'
+    name: 'VI Software Launcher Core'
     version: number
 }
 
@@ -59,7 +59,7 @@ export class MojangRestAPI {
 
     private static readonly TIMEOUT = 2500
 
-    public static readonly AUTH_ENDPOINT = 'https://authserver.visoftware.tech/'
+    public static readonly AUTH_ENDPOINT = 'https://api.visoftware.tech/services/authentication/login'
     public static readonly STATUS_ENDPOINT = 'https://raw.githubusercontent.com/AventiumSoftworks/helios-status-page/master/history/summary.json'
 
     private static authClient = got.extend({
@@ -74,7 +74,7 @@ export class MojangRestAPI {
     })
 
     public static readonly MINECRAFT_AGENT: Agent = {
-        name: 'Minecraft',
+        name: 'VI Software Launcher Core',
         version: 1
     }
 
@@ -273,7 +273,8 @@ export class MojangRestAPI {
                 agent,
                 username,
                 password,
-                requestUser
+                requestUser,
+
             }
             if(clientToken != null){
                 json.clientToken = clientToken
