@@ -1,6 +1,6 @@
 {
   "name": "vis-launcher-core",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "description": "Librería de programación para VIS Launcher. Generalmente para autentificación.",
   "main": "dist/index.js",
   "scripts": {
@@ -76,6 +76,7 @@
     "fs-extra": "^11.2.0",
     "got": "^11.8.6",
     "luxon": "^3.4.4",
+    "node-machine-id": "^1.1.12",
     "node-stream-zip": "^1.15.0",
     "semver": "^7.5.4",
     "tar-fs": "^3.0.4",

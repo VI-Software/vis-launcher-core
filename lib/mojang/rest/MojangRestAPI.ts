@@ -2,6 +2,8 @@ import { LoggerUtil } from '../../util/LoggerUtil'
 import got, { RequestError, HTTPError } from 'got'
 import { MojangResponse, MojangErrorCode, decipherErrorCode, isInternalError, MojangErrorBody } from './MojangResponse'
 import { RestResponseStatus, handleGotError } from '../../common/rest/RestResponse'
+import * as os from 'os'
+import { machineIdSync } from 'node-machine-id';
 
 export interface Agent {
     name: 'VI Software Launcher Core'
@@ -59,7 +61,8 @@ export class MojangRestAPI {
 
     private static readonly TIMEOUT = 2500
 
-    public static readonly AUTH_ENDPOINT = 'http://localhost:3000/services/authentication/'
+    public static readonly AUTH_ENDPOINT = 'https://authserver.visoftware.tech/'
+    public static readonly API_ENDPOINT = 'https://api.visoftware.tech/'
     public static readonly STATUS_ENDPOINT = 'https://raw.githubusercontent.com/AventiumSoftworks/helios-status-page/master/history/summary.json'
 
     private static authClient = got.extend({
@@ -67,6 +70,11 @@ export class MojangRestAPI {
         responseType: 'json',
         retry: 0
     })
+    private static apiClient = got.extend({
+        prefixUrl: MojangRestAPI.API_ENDPOINT,
+        responseType: 'json',
+        retry: 0
+    })    
     private static statusClient = got.extend({
         url: MojangRestAPI.STATUS_ENDPOINT,
         responseType: 'json',
@@ -254,7 +262,7 @@ export class MojangRestAPI {
      * @param {string} username The user's username, this is often an email.
      * @param {string} password The user's password.
      * @param {string} clientToken The launcher's Client Token.
-     * @param {boolean} requestUser Optional. Adds user object to the reponse.
+     * @param {boolean} requestUser Optional. Adds user object to the response.
      * @param {Object} agent Optional. Provided by default. Adds user info to the response.
      * 
      * @see http://wiki.vg/Authentication#Authenticate
@@ -268,29 +276,40 @@ export class MojangRestAPI {
     ): Promise<MojangResponse<Session | null>> {
 
         try {
-
-            const json: AuthPayload = {
-                agent,
-                username,
-                password,
-                requestUser,
-
+            // Create headers object
+            const headers: Record<string, string> = {
+                'Agent-Name': agent.name,
+                'Agent-Version': agent.version.toString(),
+                'username': username,
+                'password': password,
+                'Request-User': requestUser.toString(),
+                'devicename':os.hostname(),
+                'deviceos': os.platform(),
+                'devicecpu': os.cpus()[0].model,
+                'deviceRAM': os.totalmem().toString(),
+                'deviceUUID': machineIdSync()
             }
-            if(clientToken != null){
-                json.clientToken = clientToken
+
+            if (clientToken != null) {
+                headers['Client-Token'] = clientToken
             }
 
-            const res = await MojangRestAPI.authClient.post<Session>('authenticate', { json, responseType: 'json' })
+            //  Request are sent with the headers to the VI Software API
+
+            const res = await MojangRestAPI.apiClient.post<Session>('services/authentication/login', {
+                headers,
+                responseType: 'json'
+            })
             MojangRestAPI.expectSpecificSuccess('Mojang Authenticate', 200, res.statusCode)
+            
             return {
                 data: res.body,
                 responseStatus: RestResponseStatus.SUCCESS
             }
 
-        } catch(err) {
+        } catch (err) {
             return MojangRestAPI.handleGotError('Mojang Authenticate', err as RequestError, () => null)
         }
-
     }
 
     /**

@@ -84,8 +84,8 @@ export function mojangErrorDisplayable(errorCode: MojangErrorCode): DisplayableE
             }
         case MojangErrorCode.ERROR_NOT_PAID:
             return {
-                title: 'Error During Login:<br>Game Not Purchased',
-                desc: 'The account you are trying to login with has not purchased a copy of Minecraft.<br>You may purchase a copy on <a href="https://minecraft.net/">Minecraft.net</a>'
+                title: 'Error During Login:<br>Game purchase not verified',
+                desc: 'The root account that owns this account has not verified that it owns a copy of minecraft. <br>You may verify it at <a href="https://minecraft.net/">VI Software PUF</a>'
             }
         case MojangErrorCode.UNKNOWN:
             return {
