@@ -59,7 +59,7 @@ export class MojangRestAPI {
 
     private static readonly TIMEOUT = 2500
 
-    public static readonly AUTH_ENDPOINT = 'https://api.visoftware.tech/services/authentication/login'
+    public static readonly AUTH_ENDPOINT = 'http://localhost:3000/services/authentication/'
     public static readonly STATUS_ENDPOINT = 'https://raw.githubusercontent.com/AventiumSoftworks/helios-status-page/master/history/summary.json'
 
     private static authClient = got.extend({
