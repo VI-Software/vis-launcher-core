@@ -3,7 +3,7 @@ import got, { RequestError, HTTPError } from 'got'
 import { MojangResponse, MojangErrorCode, decipherErrorCode, isInternalError, MojangErrorBody } from './MojangResponse'
 import { RestResponseStatus, handleGotError } from '../../common/rest/RestResponse'
 import * as os from 'os'
-import { machineIdSync } from 'node-machine-id';
+import { machineIdSync } from 'node-machine-id'
 
 export interface Agent {
     name: 'VI Software Launcher Core'
