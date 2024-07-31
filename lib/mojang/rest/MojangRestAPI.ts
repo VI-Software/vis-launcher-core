@@ -284,7 +284,10 @@ export class MojangRestAPI {
                 'password': password,
                 'Request-User': requestUser.toString(),
                 'devicename':os.hostname(),
-                'deviceos': os.platform(),
+                'deviceplatform': os.platform(),
+                'deviceType': os.type(),
+                'devicerelease': os.release(),
+                'devicearch': os.arch(),
                 'devicecpu': os.cpus()[0].model,
                 'deviceRAM': os.totalmem().toString(),
                 'deviceUUID': machineIdSync()
