@@ -276,7 +276,7 @@ export class MojangRestAPI {
     ): Promise<MojangResponse<Session | null>> {
 
         try {
-            // Create headers object
+            //  Request are sent with the headers to the VI Software API
             const headers: Record<string, string> = {
                 'Agent-Name': agent.name,
                 'Agent-Version': agent.version.toString(),
@@ -297,7 +297,6 @@ export class MojangRestAPI {
                 headers['Client-Token'] = clientToken
             }
 
-            //  Request are sent with the headers to the VI Software API
 
             const res = await MojangRestAPI.apiClient.post<Session>('services/authentication/login', {
                 headers,
