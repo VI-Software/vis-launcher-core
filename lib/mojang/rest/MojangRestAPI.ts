@@ -61,8 +61,8 @@ export class MojangRestAPI {
 
     private static readonly TIMEOUT = 2500
 
-    public static readonly AUTH_ENDPOINT = 'https://authserver.visoftware.tech/'
-    public static readonly API_ENDPOINT = 'https://api.visoftware.tech/'
+    public static readonly AUTH_ENDPOINT = 'https://authserver.visoftware.dev/'
+    public static readonly API_ENDPOINT = 'https://api.visoftware.dev/'
     public static readonly STATUS_ENDPOINT = 'https://raw.githubusercontent.com/VI-Software/status/master/history/summary.json'
 
     private static authClient = got.extend({
