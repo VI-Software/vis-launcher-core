@@ -81,6 +81,7 @@
     "semver": "^7.5.4",
     "tar-fs": "^3.0.4",
     "triple-beam": "^1.4.1",
+    "vis-launcher-core": "file:",
     "winreg": "^1.2.5",
     "winston": "^3.11.0"
   },
