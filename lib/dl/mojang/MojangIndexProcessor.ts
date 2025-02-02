@@ -131,7 +131,8 @@ export class MojangIndexProcessor extends IndexProcessor {
 
             return res.body
         } catch(error) {
-            return handleGotError(url, error as RequestError, MojangIndexProcessor.logger, () => null).data
+            const response = handleGotError(url, error as RequestError, MojangIndexProcessor.logger, () => null)
+            return response.data as T | null
         }
 
     }
@@ -141,7 +142,8 @@ export class MojangIndexProcessor extends IndexProcessor {
             const res = await this.client.get<MojangVersionManifest>(MojangIndexProcessor.VERSION_MANIFEST_ENDPOINT)
             return res.body
         } catch(error) {
-            return handleGotError('Load Mojang Version Manifest', error as RequestError, MojangIndexProcessor.logger, () => null).data
+            const response = handleGotError('Load Mojang Version Manifest', error as RequestError, MojangIndexProcessor.logger, () => null)
+            return response.data as MojangVersionManifest | null
         }
     }
 
