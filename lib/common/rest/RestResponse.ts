@@ -1,4 +1,4 @@
-import { HTTPError, TimeoutError, ParseError } from 'got'
+import { RequestError, HTTPError, TimeoutError, ParseError } from 'got'
 import { Logger } from 'winston'
 
 /**
@@ -24,7 +24,7 @@ export interface RestResponse<T> {
     /**
      * The response body.
      */
-    data: T | undefined
+    data: T
     /**
      * The response status.
      */
@@ -91,11 +91,4 @@ export function handleGotError<T>(operation: string, error: RequestError, logger
     }
 
     return response
-}
-
-/**
- * Custom RequestError type combining Error properties with optional code
- */
-export interface RequestError extends Error {
-    code?: string
 }
