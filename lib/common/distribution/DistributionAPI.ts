@@ -27,7 +27,8 @@ export class DistributionAPI {
         private commonDir: string,
         private instanceDir: string,
         private remoteUrl: string,
-        private devMode: boolean
+        private devMode: boolean,
+        private authHeaders: Record<string, string> = {}
     ) {
         this.distroPath = resolve(launcherDirectory, this.DISTRO_FILE)
         this.distroDevPath = resolve(launcherDirectory, this.DISTRO_FILE_DEV)
@@ -112,7 +113,10 @@ export class DistributionAPI {
 
         try {
 
-            const res = await got.get<Distribution>(this.remoteUrl, { responseType: 'json' })
+            const res = await got.get<Distribution>(this.remoteUrl, { 
+                responseType: 'json',
+                headers: this.authHeaders
+            })
 
             return {
                 data: res.body,
