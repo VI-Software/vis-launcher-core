@@ -66,7 +66,8 @@ export class FullRepair extends BaseTransmitter {
         private instanceDirectory: string,
         private launcherDirectory: string,
         private serverId: string,
-        private devMode: boolean
+        private devMode: boolean,
+        private authHeaders?: Record<string, string>
     ) {
         super()
     }
@@ -108,7 +109,8 @@ export class FullRepair extends BaseTransmitter {
                 instanceDirectory: this.instanceDirectory,
                 launcherDirectory: this.launcherDirectory,
                 serverId: this.serverId,
-                devMode: this.devMode
+                devMode: this.devMode,
+                authHeaders: this.authHeaders
             } as ValidateTransmission)
         })
 
