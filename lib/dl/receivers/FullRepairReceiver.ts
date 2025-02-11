@@ -20,7 +20,6 @@ export interface ValidateTransmission {
     commonDirectory: string
     instanceDirectory: string
     devMode: boolean
-    authHeaders?: Record<string, string>
 }
 
 export interface DownloadTransmission {
@@ -103,8 +102,7 @@ export class FullRepairReceiver implements Receiver {
             message.commonDirectory,
             message.instanceDirectory,
             null!, // The main process must refresh, this is a local pull only.
-            message.devMode,
-            message.authHeaders
+            message.devMode
         )
     
         const distribution = await api.getDistributionLocalLoadOnly()
@@ -117,7 +115,7 @@ export class FullRepairReceiver implements Receiver {
             message.commonDirectory,
             distribution,
             message.serverId,
-            message.authHeaders
+            api.getAuthHeaders()
         )
 
         this.processors = [

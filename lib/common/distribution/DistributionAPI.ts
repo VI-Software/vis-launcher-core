@@ -77,6 +77,10 @@ export class DistributionAPI {
         return this.devMode
     }
 
+    public getAuthHeaders(): Record<string, string> {
+        return this.authHeaders
+    }
+
     protected async loadDistribution(): Promise<Distribution> {
 
         const distro = await this._loadDistributionNullable()
