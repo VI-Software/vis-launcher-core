@@ -15,7 +15,12 @@ export class DistributionIndexProcessor extends IndexProcessor {
 
     private static readonly logger = LoggerUtil.getLogger('DistributionIndexProcessor')
 
-    constructor(commonDir: string, protected distribution: HeliosDistribution, protected serverId: string) {
+    constructor(
+        commonDir: string, 
+        protected distribution: HeliosDistribution, 
+        protected serverId: string,
+        protected authHeaders: Record<string, string> = {}
+    ) {
         super(commonDir)
     }
 
