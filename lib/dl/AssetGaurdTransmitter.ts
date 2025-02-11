@@ -84,7 +84,6 @@ export class FullRepair extends BaseTransmitter {
 
                 switch(message.response) {
                     case 'validateProgress':
-                        log.debug('Received validate progress ' + message.percent)
                         onProgress(message.percent)
                         break
                     case 'validateComplete':
@@ -124,7 +123,6 @@ export class FullRepair extends BaseTransmitter {
 
                 switch(message.response) {
                     case 'downloadProgress':
-                        log.debug('Received download progress ' + message.percent)
                         onProgress(message.percent)
                         break
                     case 'downloadComplete':

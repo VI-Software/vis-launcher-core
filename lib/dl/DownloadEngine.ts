@@ -43,9 +43,6 @@ export async function downloadFile(url: string, path: string, onProgress?: (prog
 
     await ensureDir(dirname(path))
 
-    if (authHeaders) {
-        log.debug(`Downloading ${url} with auth headers:`, JSON.stringify(authHeaders))
-    }
 
     const MAX_RETRIES = 10
     let fileWriterStream: WriteStream = null!       // The write stream.

@@ -99,7 +99,6 @@ export class FullRepairReceiver implements Receiver {
     }
 
     public async validate(message: ValidateTransmission): Promise<void> {
-        log.debug('Received auth headers in validate:', message.authHeaders)
         this.authHeaders = message.authHeaders || {} // Ensure we have at least an empty object
         
         const api = new DistributionAPI(
@@ -154,7 +153,6 @@ export class FullRepairReceiver implements Receiver {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public async download(_message: DownloadTransmission): Promise<void> {
-        log.debug('Using auth headers for download:', this.authHeaders)
         
         const expectedTotalSize = getExpectedDownloadSize(this.assets)
     
