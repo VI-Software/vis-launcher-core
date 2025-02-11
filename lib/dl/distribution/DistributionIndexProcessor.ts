@@ -22,6 +22,7 @@ export class DistributionIndexProcessor extends IndexProcessor {
         protected authHeaders: Record<string, string> = {}
     ) {
         super(commonDir)
+        DistributionIndexProcessor.logger.debug('DistributionIndexProcessor initialized with headers:', authHeaders)
     }
 
     public async init(): Promise<void> {
@@ -55,6 +56,11 @@ export class DistributionIndexProcessor extends IndexProcessor {
     private async validateModules(modules: HeliosModule[], accumulator: Asset[]): Promise<void> {
         for(const module of modules) {
             const hash = module.rawModule.artifact.MD5
+            
+            // Only log if we actually have headers
+            if(Object.keys(this.authHeaders).length > 0) {
+                DistributionIndexProcessor.logger.debug(`Processing module ${module.rawModule.id} with auth headers:`, this.authHeaders)
+            }
 
             if(!await validateLocalFile(module.getPath(), HashAlgo.MD5, hash)) {
                 accumulator.push({
@@ -63,7 +69,8 @@ export class DistributionIndexProcessor extends IndexProcessor {
                     algo: HashAlgo.MD5,
                     size: module.rawModule.artifact.size,
                     url: module.rawModule.artifact.url,
-                    path: module.getPath()
+                    path: module.getPath(),
+                    headers: { ...this.authHeaders } // Pass a copy of the headers
                 })
             }
 

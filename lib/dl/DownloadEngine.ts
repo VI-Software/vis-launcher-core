@@ -29,7 +29,7 @@ export async function downloadQueue(assets: Asset[], onProgress: (received: numb
         }
     }
 
-    const wrap = (asset: Asset): Promise<void> => downloadFile(asset.url, asset.path, onEachProgress(asset))
+    const wrap = (asset: Asset): Promise<void> => downloadFile(asset.url, asset.path, onEachProgress(asset), asset.headers)
 
     const q: queueAsPromised<Asset, void> = fastq.promise(wrap, 15)
 
@@ -39,10 +39,13 @@ export async function downloadQueue(assets: Asset[], onProgress: (received: numb
     return receivedTotals
 }
 
-export async function downloadFile(url: string, path: string, onProgress?: (progress: Progress) => void): Promise<void> {
+export async function downloadFile(url: string, path: string, onProgress?: (progress: Progress) => void, authHeaders?: Record<string, string>): Promise<void> {
 
     await ensureDir(dirname(path))
 
+    if (authHeaders) {
+        log.debug(`Downloading ${url} with auth headers:`, JSON.stringify(authHeaders))
+    }
 
     const MAX_RETRIES = 10
     let fileWriterStream: WriteStream = null!       // The write stream.
@@ -64,7 +67,9 @@ export async function downloadFile(url: string, path: string, onProgress?: (prog
         }
 
         try {
-            const downloadStream = got.stream(url)
+            const options = authHeaders ? { headers: authHeaders } : undefined
+            log.debug(`Request options for ${url}:`, JSON.stringify(options))
+            const downloadStream = got.stream(url, options)
 
             fileWriterStream = createWriteStream(path)
 

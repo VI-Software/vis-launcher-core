@@ -1,10 +1,11 @@
 export interface Asset {
     id: string
+    url: string
+    path: string
     hash: string
     algo: string
     size: number
-    url: string
-    path: string
+    headers?: Record<string, string>  // Add optional headers property
 }
 
 export enum HashAlgo {

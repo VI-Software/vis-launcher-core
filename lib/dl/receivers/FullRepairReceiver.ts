@@ -20,6 +20,7 @@ export interface ValidateTransmission {
     commonDirectory: string
     instanceDirectory: string
     devMode: boolean
+    authHeaders?: Record<string, string>
 }
 
 export interface DownloadTransmission {
@@ -51,6 +52,7 @@ export class FullRepairReceiver implements Receiver {
 
     private processors: IndexProcessor[] = []
     private assets: Asset[] = []
+    private authHeaders?: Record<string, string>
 
     public async execute(message: FullRepairTransmission): Promise<void> {
         
@@ -97,12 +99,16 @@ export class FullRepairReceiver implements Receiver {
     }
 
     public async validate(message: ValidateTransmission): Promise<void> {
+        log.debug('Received auth headers in validate:', message.authHeaders)
+        this.authHeaders = message.authHeaders || {} // Ensure we have at least an empty object
+        
         const api = new DistributionAPI(
             message.launcherDirectory,
             message.commonDirectory,
             message.instanceDirectory,
             null!, // The main process must refresh, this is a local pull only.
-            message.devMode
+            message.devMode,
+            this.authHeaders // Pass through the auth headers
         )
     
         const distribution = await api.getDistributionLocalLoadOnly()
@@ -115,7 +121,7 @@ export class FullRepairReceiver implements Receiver {
             message.commonDirectory,
             distribution,
             message.serverId,
-            api.getAuthHeaders()
+            { ...this.authHeaders } // Pass a copy of the headers
         )
 
         this.processors = [
@@ -148,6 +154,8 @@ export class FullRepairReceiver implements Receiver {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public async download(_message: DownloadTransmission): Promise<void> {
+        log.debug('Using auth headers for download:', this.authHeaders)
+        
         const expectedTotalSize = getExpectedDownloadSize(this.assets)
     
         log.debug('Expected download size ' + expectedTotalSize)

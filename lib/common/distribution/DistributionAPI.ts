@@ -77,6 +77,7 @@ export class DistributionAPI {
         return this.devMode
     }
 
+
     public getAuthHeaders(): Record<string, string> {
         return this.authHeaders
     }
