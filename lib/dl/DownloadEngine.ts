@@ -65,7 +65,6 @@ export async function downloadFile(url: string, path: string, onProgress?: (prog
 
         try {
             const options = authHeaders ? { headers: authHeaders } : undefined
-            log.debug(`Request options for ${url}:`, JSON.stringify(options))
             const downloadStream = got.stream(url, options)
 
             fileWriterStream = createWriteStream(path)

@@ -107,7 +107,7 @@ export class FullRepairReceiver implements Receiver {
             message.instanceDirectory,
             null!, // The main process must refresh, this is a local pull only.
             message.devMode,
-            this.authHeaders // Pass through the auth headers
+            this.authHeaders 
         )
     
         const distribution = await api.getDistributionLocalLoadOnly()
@@ -120,7 +120,7 @@ export class FullRepairReceiver implements Receiver {
             message.commonDirectory,
             distribution,
             message.serverId,
-            { ...this.authHeaders } // Pass a copy of the headers
+            { ...this.authHeaders } 
         )
 
         this.processors = [

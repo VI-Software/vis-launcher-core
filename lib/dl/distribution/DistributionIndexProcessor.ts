@@ -22,7 +22,6 @@ export class DistributionIndexProcessor extends IndexProcessor {
         protected authHeaders: Record<string, string> = {}
     ) {
         super(commonDir)
-        DistributionIndexProcessor.logger.debug('DistributionIndexProcessor initialized with headers:', authHeaders)
     }
 
     public async init(): Promise<void> {
