@@ -57,11 +57,6 @@ export class DistributionIndexProcessor extends IndexProcessor {
         for(const module of modules) {
             const hash = module.rawModule.artifact.MD5
             
-            // Only log if we actually have headers
-            if(Object.keys(this.authHeaders).length > 0) {
-                DistributionIndexProcessor.logger.debug(`Processing module ${module.rawModule.id} with auth headers:`, this.authHeaders)
-            }
-
             if(!await validateLocalFile(module.getPath(), HashAlgo.MD5, hash)) {
                 accumulator.push({
                     id: module.rawModule.id,
@@ -70,7 +65,7 @@ export class DistributionIndexProcessor extends IndexProcessor {
                     size: module.rawModule.artifact.size,
                     url: module.rawModule.artifact.url,
                     path: module.getPath(),
-                    headers: { ...this.authHeaders } // Pass a copy of the headers
+                    headers: { ...this.authHeaders } 
                 })
             }
 
