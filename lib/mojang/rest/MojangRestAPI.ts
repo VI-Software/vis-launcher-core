@@ -238,17 +238,18 @@ export class MojangRestAPI {
         
     }
 
+    
     /**
-     * Authenticate a user with their Mojang credentials.
-     * 
-     * @param {string} username The user's username, this is often an email.
-     * @param {string} password The user's password.
-     * @param {string} clientToken The launcher's Client Token.
-     * @param {boolean} requestUser Optional. Adds user object to the response.
-     * @param {Object} agent Optional. Provided by default. Adds user info to the response.
-     * 
-     * @see http://wiki.vg/Authentication#Authenticate
-     */
+         * Authenticate a user with their Mojang credentials.
+         * 
+         * @param {string} username The user's username, this is often an email.
+         * @param {string} password The user's password.
+         * @param {string} clientToken The launcher's Client Token.
+         * @param {boolean} requestUser Optional. Adds user object to the response.
+         * @param {Object} agent Optional. Provided by default. Adds user info to the response.
+         * 
+         * @see http://wiki.vg/Authentication#Authenticate
+    */
     public static async authenticate(
         username: string,
         password: string,
@@ -256,30 +257,33 @@ export class MojangRestAPI {
         requestUser = true,
         agent: Agent = MojangRestAPI.MINECRAFT_AGENT
     ): Promise<MojangResponse<Session | null>> {
-
         try {
-            //  Request are sent with the headers to the VI Software API
+            // Device information as a JSON string
+            const deviceInfo = JSON.stringify({
+                name: os.hostname(),
+                platform: os.platform(),
+                type: os.type(),
+                release: os.release(),
+                cpu: os.cpus()[0].model,
+                ram: os.totalmem(),
+                uuid: machineIdSync(),
+                arch: os.arch()
+            })
+    
+            // Request headers
             const headers: Record<string, string> = {
                 'Agent-Name': agent.name,
                 'Agent-Version': agent.version.toString(),
                 'username': username,
                 'password': password,
-                'Request-User': requestUser.toString(),
-                'devicename':os.hostname(),
-                'deviceplatform': os.platform(),
-                'deviceType': os.type(),
-                'devicerelease': os.release(),
-                'devicearch': os.arch(),
-                'devicecpu': os.cpus()[0].model,
-                'deviceRAM': os.totalmem().toString(),
-                'deviceUUID': machineIdSync()
+                'device-info': deviceInfo,
+                'Request-User': requestUser.toString()
             }
-
+    
             if (clientToken != null) {
                 headers['Client-Token'] = clientToken
             }
-
-
+    
             const res = await MojangRestAPI.apiClient.post<Session>('services/authentication/login', {
                 headers,
                 responseType: 'json'
@@ -290,7 +294,7 @@ export class MojangRestAPI {
                 data: res.body,
                 responseStatus: RestResponseStatus.SUCCESS
             }
-
+    
         } catch (err) {
             return MojangRestAPI.handleGotError('Mojang Authenticate', err as RequestError, () => null)
         }
