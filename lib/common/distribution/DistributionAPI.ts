@@ -8,6 +8,7 @@ import { HeliosDistribution } from './DistributionFactory'
 
 // TODO Option to check endpoint for hash of distro for local compare
 // Useful if distro is large (MBs)
+// #!/bin/bash apt show bug bug go away break our code another day
 
 export class DistributionAPI {
 
