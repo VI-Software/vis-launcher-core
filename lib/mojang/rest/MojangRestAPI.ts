@@ -109,17 +109,11 @@ export class MojangRestAPI {
                 essential: true
             },
             {
-                service: 'vi-software-puf',
+                service: 'vi-software-portal',
                 status: MojangStatusColor.GREY,
-                name: 'VI Software PUF',
-                essential: false
-            },
-            {
-                service: 'vi-software-puf-nightly',
-                status: MojangStatusColor.GREY,
-                name: 'VI Software PUF Nightly',
-                essential: false
-            },
+                name: 'VI Software Portal',
+                essential: true
+            },         
             {
                 service: 'vi-software-skin-rendering-service',
                 status: MojangStatusColor.GREY,
