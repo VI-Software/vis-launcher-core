@@ -8,6 +8,7 @@ import { LoggerUtil } from '../../util/LoggerUtil'
 import { IndexProcessor } from '../IndexProcessor'
 import { validateLocalFile } from '../../common/util/FileUtils'
 import { HTTPError, ParseError, ReadError, RequestError, TimeoutError } from 'got'
+import { machineIdSync } from 'node-machine-id'
 
 const log = LoggerUtil.getLogger('FullRepairReceiver')
 
@@ -53,6 +54,17 @@ export class FullRepairReceiver implements Receiver {
     private processors: IndexProcessor[] = []
     private assets: Asset[] = []
     private authHeaders?: Record<string, string>
+    private deviceId: string
+
+    constructor() {
+        // Generate the device ID at initialization
+        try {
+            this.deviceId = machineIdSync()
+        } catch (error) {
+            log.error('Failed to get machine ID', error)
+            this.deviceId = 'unknown-device'
+        }
+    }
 
     public async execute(message: FullRepairTransmission): Promise<void> {
         
@@ -120,7 +132,7 @@ export class FullRepairReceiver implements Receiver {
             message.commonDirectory,
             distribution,
             message.serverId,
-            { ...this.authHeaders } 
+            { ...this.authHeaders }
         )
 
         this.processors = [
@@ -158,6 +170,14 @@ export class FullRepairReceiver implements Receiver {
     
         log.debug('Expected download size ' + expectedTotalSize)
         this.assets.forEach(({ id }) => log.debug(`Asset Requires Download: ${id}`))
+
+        // Add device header to all assets that need to be downloaded
+        this.assets.forEach(asset => {
+            if (!asset.headers) {
+                asset.headers = {}
+            }
+            asset.headers.device = this.deviceId
+        })
 
         // Reduce load on IPC channel by sending only whole numbers.
         let currentPercent = 0

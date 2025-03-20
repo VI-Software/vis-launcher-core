@@ -8,8 +8,23 @@ import { ensureDir } from 'fs-extra'
 import { dirname } from 'path'
 import { LoggerUtil } from '../util/LoggerUtil'
 import { sleep } from '../util/NodeUtil'
+import { machineIdSync } from 'node-machine-id'
 
 const log = LoggerUtil.getLogger('DownloadEngine')
+
+// Cache the device ID to avoid multiple calls to machineIdSync
+let deviceId: string
+function getDeviceId(): string {
+    if (!deviceId) {
+        try {
+            deviceId = machineIdSync()
+        } catch (error) {
+            log.error('Failed to get machine ID', error)
+            deviceId = 'unknown-device'
+        }
+    }
+    return deviceId
+}
 
 export function getExpectedDownloadSize(assets: Asset[]): number {
     return assets.map(({ size }) => size).reduce((acc, v) => acc + v, 0)
@@ -43,6 +58,11 @@ export async function downloadFile(url: string, path: string, onProgress?: (prog
 
     await ensureDir(dirname(path))
 
+    // Create headers object with device ID
+    const headers = { 
+        ...authHeaders,
+        device: getDeviceId()
+    }
 
     const MAX_RETRIES = 10
     let fileWriterStream: WriteStream = null!       // The write stream.
@@ -64,7 +84,8 @@ export async function downloadFile(url: string, path: string, onProgress?: (prog
         }
 
         try {
-            const options = authHeaders ? { headers: authHeaders } : undefined
+            // Use headers with device ID
+            const options = { headers }
             const downloadStream = got.stream(url, options)
 
             fileWriterStream = createWriteStream(path)

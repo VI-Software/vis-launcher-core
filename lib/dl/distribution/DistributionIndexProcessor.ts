@@ -10,10 +10,12 @@ import { ensureDir, readJson, writeJson } from 'fs-extra'
 import StreamZip from 'node-stream-zip'
 import { dirname } from 'path'
 import { VersionJsonBase } from '../mojang/MojangTypes'
+import { machineIdSync } from 'node-machine-id'
 
 export class DistributionIndexProcessor extends IndexProcessor {
 
     private static readonly logger = LoggerUtil.getLogger('DistributionIndexProcessor')
+    private deviceId: string
 
     constructor(
         commonDir: string, 
@@ -22,6 +24,14 @@ export class DistributionIndexProcessor extends IndexProcessor {
         protected authHeaders: Record<string, string> = {}
     ) {
         super(commonDir)
+        
+        // Generate the device ID at initialization
+        try {
+            this.deviceId = machineIdSync()
+        } catch (error) {
+            DistributionIndexProcessor.logger.error('Failed to get machine ID', error)
+            this.deviceId = 'unknown-device'
+        }
     }
 
     public async init(): Promise<void> {
@@ -64,7 +74,10 @@ export class DistributionIndexProcessor extends IndexProcessor {
                     size: module.rawModule.artifact.size,
                     url: module.rawModule.artifact.url,
                     path: module.getPath(),
-                    headers: { ...this.authHeaders } 
+                    headers: { 
+                        ...this.authHeaders,
+                        'device': this.deviceId 
+                    } 
                 })
             }
 

@@ -5,6 +5,7 @@ import { LoggerUtil } from '../../util/LoggerUtil'
 import { RestResponse, handleGotError, RestResponseStatus } from '../rest/RestResponse'
 import { pathExists, readFile, writeJson } from 'fs-extra'
 import { HeliosDistribution } from './DistributionFactory'
+import { machineIdSync } from 'node-machine-id'
 
 // TODO Option to check endpoint for hash of distro for local compare
 // Useful if distro is large (MBs)
@@ -21,6 +22,7 @@ export class DistributionAPI {
 
     private distribution!: HeliosDistribution
     private rawDistribution!: Distribution
+    private deviceId: string
 
     constructor(
         private launcherDirectory: string,
@@ -32,6 +34,14 @@ export class DistributionAPI {
     ) {
         this.distroPath = resolve(launcherDirectory, this.DISTRO_FILE)
         this.distroDevPath = resolve(launcherDirectory, this.DISTRO_FILE_DEV)
+        
+        // Generate the device ID at initialization
+        try {
+            this.deviceId = machineIdSync()
+        } catch (error) {
+            DistributionAPI.log.error('Failed to get machine ID', error)
+            this.deviceId = 'unknown-device'
+        }
     }
 
     public async getDistribution(): Promise<HeliosDistribution> {
@@ -117,10 +127,15 @@ export class DistributionAPI {
     protected async pullRemote(): Promise<RestResponse<Distribution | null>> {
 
         try {
+            // Combine auth headers with device header
+            const headers = { 
+                ...this.authHeaders,
+                'device': this.deviceId
+            }
 
             const res = await got.get<Distribution>(this.remoteUrl, { 
                 responseType: 'json',
-                headers: this.authHeaders
+                headers: headers
             })
 
             return {
