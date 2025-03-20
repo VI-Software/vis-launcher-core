@@ -58,10 +58,10 @@ export async function downloadFile(url: string, path: string, onProgress?: (prog
 
     await ensureDir(dirname(path))
 
-    // Create headers object with device ID
-    const headers = { 
-        ...authHeaders,
-        device: getDeviceId()
+    // Only add device ID if not already provided in headers
+    const headers = authHeaders || {}
+    if (!headers.device) {
+        headers.device = getDeviceId()
     }
 
     const MAX_RETRIES = 10
@@ -84,7 +84,7 @@ export async function downloadFile(url: string, path: string, onProgress?: (prog
         }
 
         try {
-            // Use headers with device ID
+            // Always pass headers, even if empty
             const options = { headers }
             const downloadStream = got.stream(url, options)
 
