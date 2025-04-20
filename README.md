@@ -1,7 +1,7 @@
 # VIS-LAUNCHER-CORE
 
-Librería de programación para VIS Launcher. Generalmente para autentificación.
+Library for the VI Software Launcher, a Minecraft launcher that supports multiple Minecraft versions and modpacks.
 
-### Requisitos
+### Requirements
 
-* Node.js 18 (minimum)
+* Node.js 20 (minimum)
