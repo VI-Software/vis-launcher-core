@@ -13,15 +13,17 @@ export class LoggerUtil {
                 format.label({ label }),
                 format.printf(info => {
                     if(info[SPLAT]) {
-                        if(info[SPLAT].length === 1 && info[SPLAT][0] instanceof Error) {
-                            const err: Error = info[SPLAT][0]
-                            if(info.message.length > err.message.length && info.message.endsWith(err.message)) {
+                        const splatArgs = info[SPLAT] as unknown[];
+                        if(splatArgs.length === 1 && splatArgs[0] instanceof Error) {
+                            const err: Error = splatArgs[0];
+                            const message = info.message as string;
+                            if(message.length > err.message.length && message.endsWith(err.message)) {
                                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                                info.message = info.message.substring(0, info.message.length-err.message.length)
+                                info.message = message.substring(0, message.length-err.message.length)
                             }
-                        } else if(info[SPLAT].length > 0) {
+                        } else if(splatArgs.length > 0) {
                             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            info.message += ' ' + info[SPLAT].map((it: any) => {
+                            info.message = (info.message as string) + ' ' + splatArgs.map((it: any) => {
                                 if(typeof it === 'object' && it != null) {
                                     return inspect(it, false, null, true)
                                 }
