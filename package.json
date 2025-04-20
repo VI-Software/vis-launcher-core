@@ -1,6 +1,6 @@
 {
   "name": "vis-launcher-core",
-  "version": "2.10.2",
+  "version": "2.10.3",
   "description": "Library for the VI Software Launcher, a Minecraft launcher that supports multiple Minecraft versions and modpacks.",
   "main": "dist/index.js",
   "scripts": {
@@ -82,7 +82,6 @@
     "semver": "^7.7.1",
     "tar-fs": "^3.0.8",
     "triple-beam": "^1.4.1",
-    "vis-launcher-core": "file:",
     "winreg": "^1.2.5",
     "winston": "^3.17.0"
   },
