@@ -39,8 +39,8 @@ describe('[Mojang Rest API] Errors', () => {
 
     it('Authenticate (Invalid Credentials)', async () => {
 
-        nock(MojangRestAPI.API_ENDPOINT)
-            .post('services/authentication/login')
+        nock(MojangRestAPI.AUTH_ENDPOINT)
+            .post('/authenticate')
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             .reply(403, (uri, requestBody: unknown): { error: string, errorMessage: string } => {
                 return {
@@ -82,31 +82,35 @@ describe('[Mojang Rest API] Auth', () => {
     it('Authenticate', async () => {
 
         nock(MojangRestAPI.AUTH_ENDPOINT)
-            .post('/authenticate')
-            .reply(200, (uri, requestBody: AuthPayload): Session => {
-                const mockResponse: Session = {
-                    accessToken: 'abc',
-                    clientToken: requestBody.clientToken!,
-                    selectedProfile: {
-                        id: 'def',
-                        name: 'username'
-                    }
+            .post('/authenticate', (body: AuthPayload) => {
+                // Validate the request body
+                return body.agent?.name === MojangRestAPI.MINECRAFT_AGENT.name
+                    && body.agent?.version === MojangRestAPI.MINECRAFT_AGENT.version
+                    && body.username === 'user'
+                    && body.password === 'pass'
+                    && body.clientToken === 'xxx'
+                    && body.requestUser === true
+            })
+            .reply(200, {
+                accessToken: 'abc',
+                clientToken: 'xxx',
+                selectedProfile: {
+                    id: 'def',
+                    name: 'username'
+                },
+                user: {
+                    id: 'def',
+                    properties: []
                 }
-
-                if (requestBody.requestUser) {
-                    mockResponse.user = {
-                        id: 'def',
-                        properties: []
-                    }
-                }
-
-                return mockResponse
             })
 
         const res = await MojangRestAPI.authenticate('user', 'pass', 'xxx', true)
         expectSuccess(res)
+        expect(res.data).to.not.be.null
         expect(res.data!.clientToken).to.equal('xxx')
+        expect(res.data!.accessToken).to.equal('abc')
         expect(res.data).to.have.property('user')
+        expect(res.data!.selectedProfile.name).to.equal('username')
 
     })
 

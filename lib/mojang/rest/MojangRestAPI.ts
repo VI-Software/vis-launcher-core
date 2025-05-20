@@ -264,22 +264,22 @@ export class MojangRestAPI {
                 arch: os.arch()
             })
     
-            // Request headers
-            const headers: Record<string, string> = {
-                'Agent-Name': agent.name,
-                'Agent-Version': agent.version.toString(),
-                'username': username,
-                'password': password,
-                'device-info': deviceInfo,
-                'Request-User': requestUser.toString()
+            const json: AuthPayload = {
+                agent,
+                username,
+                password,
+                requestUser
             }
-    
+
             if (clientToken != null) {
-                headers['Client-Token'] = clientToken
+                json.clientToken = clientToken
             }
     
-            const res = await MojangRestAPI.apiClient.post<Session>('services/authentication/login', {
-                headers,
+            const res = await MojangRestAPI.authClient.post<Session>('authenticate', {
+                json,
+                headers: {
+                    'Device-Info': deviceInfo
+                },
                 responseType: 'json'
             })
             MojangRestAPI.expectSpecificSuccess('Mojang Authenticate', 200, res.statusCode)
