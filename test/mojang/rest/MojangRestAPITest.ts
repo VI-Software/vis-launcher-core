@@ -339,6 +339,24 @@ const summaryResponse  = [
         }
     },
     {
+        "name": "User Content Server (Otto)",
+        "url": "https://otto-usercontent.visoftware.dev",
+        "icon": "https://icons.duckduckgo.com/ip3/otto-usercontent.visoftware.dev.ico",
+        "slug": "user-content-server-otto",
+        "status": "up",
+        "uptime": "100.00%",
+        "uptimeDay": "100.00%",
+        "uptimeWeek": "100.00%",
+        "uptimeMonth": "100.00%",
+        "uptimeYear": "100.00%",
+        "time": 440,
+        "timeDay": 440,
+        "timeWeek": 440,
+        "timeMonth": 440,
+        "timeYear": 440,
+        "dailyMinutesDown": {}
+    },
+    {
         'name': 'VI Software Docs',
         'url': 'https://docs.visoftware.dev',
         'icon': 'https://icons.duckduckgo.com/ip3/docs.visoftware.dev.ico',

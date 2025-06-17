@@ -113,7 +113,13 @@ export class MojangRestAPI {
                 status: MojangStatusColor.GREY,
                 name: 'VI Software Portal',
                 essential: true
-            },         
+            },
+            {
+                service: 'user-content-server-otto',
+                status: MojangStatusColor.GREY,
+                name: 'User Content Server (Otto)',
+                essential: false
+            },                     
             {
                 service: 'vi-software-skin-rendering-service',
                 status: MojangStatusColor.GREY,
