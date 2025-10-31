@@ -284,6 +284,8 @@ export class MojangRestAPI {
             const res = await MojangRestAPI.apiClient.post<Session>('services/authentication/login', {
                 json,
                 headers: {
+                    'username': username,
+                    'password': password,
                     'device-info': deviceInfo
                 },
                 responseType: 'json'
