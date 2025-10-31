@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "2.12.0",
+  "version": "2.12.1",
   "description": "Library for the VI Software Launcher, a Minecraft launcher that supports multiple Minecraft versions and modpacks.",
   "main": "dist/index.js",
   "scripts": {
