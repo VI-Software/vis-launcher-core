@@ -6,8 +6,7 @@
     "declaration": true,
     "outDir": "dist",
     "strict": true,
-    "esModuleInterop": true,
-    "baseUrl": "."
+    "esModuleInterop": true
   },
   "include": [
     "lib",

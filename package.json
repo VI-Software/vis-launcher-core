@@ -1,6 +1,9 @@
 {
-  "name": "vis-launcher-core",
-  "version": "2.10.4",
+  "name": "@visoftware/vis-launcher-core",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "2.12.2",
   "description": "Library for the VI Software Launcher, a Minecraft launcher that supports multiple Minecraft versions and modpacks.",
   "main": "dist/index.js",
   "scripts": {
@@ -17,7 +20,6 @@
     "./common": "./dist/common.js",
     "./dl": "./dist/dl.js",
     "./java": "./dist/java.js",
-    "./microsoft": "./dist/microsoft.js",
     "./mojang": "./dist/mojang.js"
   },
   "typesVersions": {
@@ -34,9 +36,6 @@
       "java": [
         "./dist/java.d.ts"
       ],
-      "microsoft": [
-        "./dist/microsoft.d.ts"
-      ],
       "mojang": [
         "./dist/mojang.d.ts"
       ]
@@ -46,8 +45,11 @@
     "type": "git",
     "url": "git+https://github.com/VI-Software/vis-launcher-core.git"
   },
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "author": "VI Software",
-  "license": "MIT",
+  "license": "LGPL-3.0-only",
   "devDependencies": {
     "@stylistic/eslint-plugin-ts": "^3.1.0",
     "@types/chai": "^4.3.20",
@@ -55,7 +57,7 @@
     "@types/fs-extra": "^11.0.4",
     "@types/luxon": "^3.4.2",
     "@types/mocha": "^10.0.10",
-    "@types/node": "^20.17.19",
+    "@types/node": "^22.10.0",
     "@types/semver": "^7.5.8",
     "@types/tar-fs": "^2.0.4",
     "@types/triple-beam": "^1.3.5",
@@ -69,10 +71,10 @@
     "rimraf": "^6.0.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3",
-    "typescript-eslint": "^8.24.1",
-    "vis-launcher-distribution-manager": "^1.3.3"
+    "typescript-eslint": "^8.24.1"
   },
   "dependencies": {
+    "@visoftware/distribution-types": "^1.4.0",
     "fastq": "^1.19.0",
     "fs-extra": "^11.3.0",
     "got": "^11.8.6",

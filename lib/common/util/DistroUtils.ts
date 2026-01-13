@@ -1,4 +1,4 @@
-import { Server } from 'vis-launcher-distribution-manager'
+import { Server } from '@visoftware/distribution-types'
 
 export function getMainServer(servers: Server[]): Server {
 
