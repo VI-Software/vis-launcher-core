@@ -6,6 +6,12 @@ import { RestResponse, handleGotError, RestResponseStatus } from '../rest/RestRe
 import { pathExists, readFile, writeJson } from 'fs-extra'
 import { HeliosDistribution } from './DistributionFactory'
 import { machineIdSync } from 'node-machine-id'
+import { 
+    DistributionError, 
+    UnauthorizedDistributionError, 
+    NetworkDistributionError,
+    ServerDistributionError 
+} from './DistributionError'
 
 // TODO Option to check endpoint for hash of distro for local compare
 // Useful if distro is large (MBs)
@@ -56,7 +62,7 @@ export class DistributionAPI {
         if(this.rawDistribution == null) {
             const x = await this.pullLocal()
             if(x == null) {
-                throw new Error('FATAL: Unable to load distribution from local disk.')
+                throw new DistributionError('FATAL: Unable to load distribution from local disk.')
             }
             this.rawDistribution = x
             this.distribution = new HeliosDistribution(this.rawDistribution, this.commonDir, this.instanceDir)
@@ -94,11 +100,62 @@ export class DistributionAPI {
 
     protected async loadDistribution(): Promise<Distribution> {
 
-        const distro = await this._loadDistributionNullable()
+        const remoteResult = await this.pullRemote()
+        let distro: Distribution | null = null
 
+        if(remoteResult.responseStatus === RestResponseStatus.SUCCESS && remoteResult.data != null) {
+            distro = remoteResult.data
+            await this.writeDistributionToDisk(distro)
+            return distro
+        }
+
+        if(remoteResult.error) {
+            if(remoteResult.statusCode === 401) {
+                DistributionAPI.log.warn('Received 401 Unauthorized. Authentication token may be expired or invalid.')
+                distro = await this.pullLocal()
+                if(distro != null) {
+                    DistributionAPI.log.warn('Using cached distribution due to authentication failure.')
+                    return distro
+                }
+                throw new UnauthorizedDistributionError(
+                    'Authentication failed: Invalid or expired token. No local cache available.',
+                    remoteResult.error
+                )
+            }
+
+            if(remoteResult.statusCode != null) {
+                DistributionAPI.log.warn(`Received HTTP ${remoteResult.statusCode} from distribution server.`)
+                distro = await this.pullLocal()
+                if(distro != null) {
+                    DistributionAPI.log.warn('Using cached distribution due to server error.')
+                    return distro
+                }
+                // No local cache available, throw server error
+                throw new ServerDistributionError(
+                    `Distribution server returned error (HTTP ${remoteResult.statusCode}). No local cache available.`,
+                    remoteResult.statusCode,
+                    remoteResult.error
+                )
+            }
+
+            // Network error (no response received)
+            DistributionAPI.log.warn('Network error while fetching distribution.')
+            distro = await this.pullLocal()
+            if(distro != null) {
+                DistributionAPI.log.warn('Using cached distribution due to network error.')
+                return distro
+            }
+            // No local cache available, throw network error
+            throw new NetworkDistributionError(
+                'Network error: Unable to reach distribution server. No local cache available.',
+                remoteResult.error
+            )
+        }
+
+        // No error but no data, fall back to local
+        distro = await this.pullLocal()
         if(distro == null) {
-            // TODO Bubble this up nicer
-            throw new Error('FATAL: Unable to load distribution from remote server or local disk.')
+            throw new DistributionError('FATAL: Unable to load distribution from remote server or local disk.')
         }
 
         return distro
@@ -110,7 +167,9 @@ export class DistributionAPI {
 
         if(!this.devMode) {
 
-            distro = (await this.pullRemote()).data
+            const remoteResult = await this.pullRemote()
+            distro = remoteResult.data
+            
             if(distro == null) {
                 distro = await this.pullLocal()
             } else {

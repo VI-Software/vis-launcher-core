@@ -33,6 +33,10 @@ export interface RestResponse<T> {
      * If responseStatus is ERROR, the error body.
      */
     error?: RequestError
+    /**
+     * HTTP status code, if available.
+     */
+    statusCode?: number
 
 }
 
@@ -74,6 +78,7 @@ export function handleGotError<T>(operation: string, error: RequestError, logger
     }
     
     if(error instanceof HTTPError) {
+        response.statusCode = error.response.statusCode
         logger.error(`Error during ${operation} request (HTTP Response ${error.response.statusCode})`, error)
         logger.debug('Response Details:')
         logger.debug(`URL: ${error.request.requestUrl}`)
