@@ -95,13 +95,20 @@ export class DistributionIndexProcessor extends IndexProcessor {
             throw new AssetGuardError(`Invalid server id ${this.serverId}`)
         }
 
-        const modLoaderModule = server.modules.find(({ rawModule: { type } }) => type === Type.ForgeHosted || type === Type.Forge || type === Type.Fabric)
+        const modLoaderModule = server.modules.find(({ rawModule: { type } }) => 
+            type === Type.ForgeHosted || 
+            type === Type.Forge || 
+            type === Type.Fabric ||
+            type === Type.NeoForge
+        )
 
         if(modLoaderModule == null) {
             throw new AssetGuardError('No mod loader found!')
         }
 
+        // NeoForge uses the same version manifest approach as Fabric and ForgeGradle3+
         if(modLoaderModule.rawModule.type === Type.Fabric
+            || modLoaderModule.rawModule.type === Type.NeoForge
             || DistributionIndexProcessor.isForgeGradle3(server.rawServer.minecraftVersion, modLoaderModule.getMavenComponents().version)) {
             return await this.loadVersionManifest<VersionJsonBase>(modLoaderModule)
         } else {

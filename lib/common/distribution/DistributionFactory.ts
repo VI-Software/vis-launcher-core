@@ -89,44 +89,50 @@ export class HeliosServer {
     }
 
     private parseEffectiveJavaOptions(): Required<JavaVersionProps> {
+        const javaOptions = this.rawServer.javaOptions
 
-        const options: JavaPlatformOptions[] = this.rawServer.javaOptions?.platformOptions ?? []
+        if(javaOptions == null) {
+            return this.defaultUndefinedJavaOptions({})
+        }
 
-        const mergeableProps: JavaVersionProps[] = []
-        for(const option of options) {
-
-            if (option.platform === process.platform) {
-                if (option.architecture === process.arch) {
-                    mergeableProps[0] = option
-                } else {
-                    mergeableProps[1] = option
-                }
+        if(javaOptions.platformOptions != null) {
+            const currentArchOptions = javaOptions.platformOptions.find(({ platform, architecture }) => platform === process.platform && architecture === process.arch)
+            if(currentArchOptions != null) {
+                return this.defaultUndefinedJavaOptions(currentArchOptions)
             }
-        }
-        mergeableProps[3] = {
-            distribution: this.rawServer.javaOptions?.distribution,
-            supported: this.rawServer.javaOptions?.supported,
-            suggestedMajor: this.rawServer.javaOptions?.suggestedMajor
-        }
 
-        const merged: JavaVersionProps = {}
-        for(let i=mergeableProps.length-1; i>=0; i--) {
-            if(mergeableProps[i] != null) {
-                merged.distribution = mergeableProps[i].distribution
-                merged.supported = mergeableProps[i].supported
-                merged.suggestedMajor = mergeableProps[i].suggestedMajor
+            const anyArchOptions = javaOptions.platformOptions.find(({ platform, architecture }) => platform === process.platform && architecture == null)
+            if(anyArchOptions != null) {
+                return this.defaultUndefinedJavaOptions(anyArchOptions)
             }
         }
 
-        return this.defaultUndefinedJavaOptions(merged)
+        return this.defaultUndefinedJavaOptions(javaOptions)
     }
 
     private defaultUndefinedJavaOptions(props: JavaVersionProps): Required<JavaVersionProps> {
+        const [defaultRange, defaultSuggestion] = this.defaultJavaVersion()
         return {
-            supported: props.distribution ?? mcVersionAtLeast('1.17', this.rawServer.minecraftVersion) ? '>=17.x' : '8.x',
-            distribution: props.distribution ?? process.platform === Platform.DARWIN ? JdkDistribution.CORRETTO : JdkDistribution.TEMURIN,
-            suggestedMajor: props.suggestedMajor ?? mcVersionAtLeast('1.17', this.rawServer.minecraftVersion) ? 17 : 8,
+            supported: props.supported ?? defaultRange,
+            distribution: props.distribution ?? this.defaultJavaPlatform(),
+            suggestedMajor: props.suggestedMajor ?? defaultSuggestion,
         }
+    }
+
+    private defaultJavaVersion(): [string, number] {
+        const mcVersion = this.rawServer.minecraftVersion
+        
+        if(mcVersionAtLeast('1.20.5', mcVersion)) {
+            return ['>=21.x', 21]
+        }
+        if(mcVersionAtLeast('1.17', mcVersion)) {
+            return ['>=17.x', 17]
+        }
+        return ['8.x', 8]
+    }
+
+    private defaultJavaPlatform(): JdkDistribution {
+        return process.platform === Platform.DARWIN ? JdkDistribution.CORRETTO : JdkDistribution.TEMURIN
     }
 
 }
@@ -222,6 +228,7 @@ export class HeliosModule {
             case Type.ForgeHosted:
             case Type.Fabric:
             case Type.LiteLoader:
+            case Type.NeoForge:
                 return join(commonDir, 'libraries', relativePath)
             case Type.ForgeMod:
             case Type.LiteMod:
@@ -229,6 +236,8 @@ export class HeliosModule {
                 return join(commonDir, 'modstore', relativePath)
             case Type.FabricMod:
                 return join(commonDir, 'mods', 'fabric', relativePath)
+            case Type.NeoForgeMod:
+                return join(commonDir, 'mods', 'neoforge', relativePath)
             case Type.File:
             default:
                 return join(instanceDir, this.serverId, relativePath) 
