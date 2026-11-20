@@ -123,7 +123,7 @@ export class HeliosServer {
         const mcVersion = this.rawServer.minecraftVersion
         
         if(mcVersionAtLeast('1.20.5', mcVersion)) {
-            return ['>=21.x', 21]
+            return ['21.x', 21]
         }
         if(mcVersionAtLeast('1.17', mcVersion)) {
             return ['>=17.x', 17]

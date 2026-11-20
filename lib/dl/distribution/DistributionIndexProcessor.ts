@@ -132,13 +132,25 @@ export class DistributionIndexProcessor extends IndexProcessor {
         }
     }
 
+    /**
+     * Reads the mod loader version manifest module from a server's module tree.
+     *
+     * For NeoForge, the module tree carries two VersionManifest submodules
+     * (NeoForge's own and Minecraft's), so the manifest whose id identifies neoforge
+     * is preferred. Other loaders take the single declared VersionManifest.
+     */
     public async loadVersionManifest<T>(modLoaderModule: HeliosModule): Promise<T> {
-        const versionManifstModule = modLoaderModule.subModules.find(({ rawModule: { type }}) => type === Type.VersionManifest)
-        if(versionManifstModule == null) {
+        const manifestModules = modLoaderModule.subModules.filter(({ rawModule }) => rawModule.type === Type.VersionManifest)
+        const versionManifestModule = (modLoaderModule.rawModule.type === Type.NeoForge
+            ? manifestModules.find(({ rawModule: { id } }) => id.toLowerCase().includes('neoforge'))
+            : undefined)
+            ?? manifestModules[0]
+
+        if(versionManifestModule == null) {
             throw new AssetGuardError('No mod loader version manifest module found!')
         }
 
-        return await readJson(versionManifstModule.getPath(), 'utf-8') as T
+        return await readJson(versionManifestModule.getPath(), 'utf-8') as T
     }
 
     // TODO Move this to a util maybe
