@@ -1,5 +1,5 @@
 import { createWriteStream, WriteStream } from 'fs'
-import got, { Progress, ReadError, RequestError } from 'got'
+import got, { CancelError, HTTPError, ParseError, Progress, ReadError, RequestError } from 'got'
 import { pipeline } from 'stream/promises'
 import { Asset } from './Asset'
 import * as fastq from 'fastq'
@@ -123,22 +123,42 @@ export async function downloadFile(url: string, path: string, onProgress?: (prog
     } while(retry)
 
     if(rethrow && error) {
+        const detail = `${error.name}${(error as Error & { code?: string }).code ? ` (${(error as Error & { code?: string }).code})` : ``}: ${error.message}`
         if(retryCount > MAX_RETRIES) {
-            log.error(`Maximum retries attempted for ${url}. Rethrowing exception.`)
+            log.error(`Maximum retries attempted for ${url}. Last error was ${detail}. Rethrowing exception.`)
         } else {
-            log.error(`Unknown or unretryable exception thrown during request to ${url}. Rethrowing exception.`)
+            log.error(`Non-retryable exception for ${url}: ${detail}. Rethrowing exception.`)
         }
-        
+
         throw error
     }
 
 }
 
-function retryableError(error: Error): boolean {
-    if(error instanceof RequestError) {
-        // error.name === 'RequestError' means server did not respond.
-        return error.name === 'RequestError' || error instanceof ReadError && error.code === 'ECONNRESET'
-    } else {
+/**
+ * Decide whether a download failure is worth retrying.
+ *
+ * Retried: network-level failures before/while receiving the response
+ * (DNS resolution, connection refused, socket timeout, connection reset).
+ * Also retried: HTTP responses where the server side is likely at fault
+ * (5xx), a client timeout (408) or rate limiting (429).
+ *
+ * Not retried: permanent request errors (404, 403, protocol errors),
+ * cancelled requests, response parsing errors, and anything that is not
+ * a request error at all (e.g. local file system problems).
+ */
+export function retryableError(error: Error): boolean {
+    if(error instanceof CancelError || error instanceof ParseError) {
         return false
     }
+    if(error instanceof HTTPError) {
+        const statusCode = error.response.statusCode
+        return statusCode === 408 || statusCode === 429 || statusCode >= 500
+    }
+    if(error instanceof ReadError) {
+        return error.code === 'ECONNRESET' || error.code === 'EPIPE'
+    }
+    // Covers bare RequestError and its TimeoutError subclass: the request
+    // failed at the network level without a usable response.
+    return error instanceof RequestError
 }

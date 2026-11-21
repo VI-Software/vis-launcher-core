@@ -1,14 +1,14 @@
 import { LoggerUtil } from '../../util/LoggerUtil'
 import { IndexProcessor } from '../IndexProcessor'
 import { AssetGuardError } from '../AssetGuardError'
-import { validateLocalFile, getVersionJsonPath} from '../../common/util/FileUtils'
+import { validateLocalFile, getVersionJsonPath, getLibraryDir} from '../../common/util/FileUtils'
 import { Asset, HashAlgo } from '../Asset'
 import { HeliosDistribution, HeliosModule, HeliosServer } from '../../common/distribution/DistributionFactory'
-import { Type } from '@visoftware/distribution-types'
+import { Module, Type } from '@visoftware/distribution-types'
 import { mcVersionAtLeast } from '../../common/util/MojangUtils'
 import { ensureDir, readJson, writeJson } from 'fs-extra'
 import StreamZip from 'node-stream-zip'
-import { dirname } from 'path'
+import { dirname, join } from 'path'
 import { VersionJsonBase } from '../mojang/MojangTypes'
 import { machineIdSync } from 'node-machine-id'
 
@@ -43,7 +43,7 @@ export class DistributionIndexProcessor extends IndexProcessor {
     }
 
     public async validate(onStageComplete: () => Promise<void>): Promise<{[category: string]: Asset[]}> {
-        
+
         const server: HeliosServer = this.distribution.getServerById(this.serverId)!
         if(server == null) {
             throw new AssetGuardError(`Invalid server id ${this.serverId}`)
@@ -65,7 +65,7 @@ export class DistributionIndexProcessor extends IndexProcessor {
     private async validateModules(modules: HeliosModule[], accumulator: Asset[]): Promise<void> {
         for(const module of modules) {
             const hash = module.rawModule.artifact.MD5
-            
+
             if(!await validateLocalFile(module.getPath(), HashAlgo.MD5, hash)) {
                 accumulator.push({
                     id: module.rawModule.id,
@@ -74,15 +74,46 @@ export class DistributionIndexProcessor extends IndexProcessor {
                     size: module.rawModule.artifact.size,
                     url: module.rawModule.artifact.url,
                     path: module.getPath(),
-                    headers: { 
+                    headers: {
                         ...this.authHeaders,
-                        'device': this.deviceId 
-                    } 
+                        'device': this.deviceId
+                    }
                 })
+            }
+
+            if(module.rawModule.installer != null) {
+                await this.validateInstallerFiles(module.rawModule, accumulator)
             }
 
             if(module.hasSubModules()) {
                 await this.validateModules(module.subModules, accumulator)
+            }
+        }
+    }
+
+    /**
+     * The installer payload declares the files extracted from the loader
+     * installer jar (e.g. the client binary patch). They are stored under the
+     * library directory and validated along with the rest of the distribution.
+     */
+    private async validateInstallerFiles(rawModule: Module, accumulator: Asset[]): Promise<void> {
+        const installer = rawModule.installer!
+        for(const installerFile of installer.installerFiles) {
+            const path = join(getLibraryDir(this.commonDir), installerFile.artifact.path)
+            const md5 = installerFile.artifact.MD5
+            if(!await validateLocalFile(path, HashAlgo.MD5, md5)) {
+                accumulator.push({
+                    id: `${rawModule.id}@${installerFile.pathInInstaller}`,
+                    hash: md5!,
+                    algo: HashAlgo.MD5,
+                    size: installerFile.artifact.size,
+                    url: installerFile.artifact.url,
+                    path,
+                    headers: {
+                        ...this.authHeaders,
+                        'device': this.deviceId
+                    }
+                })
             }
         }
     }

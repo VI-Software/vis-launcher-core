@@ -1,6 +1,7 @@
 export * from './common/distribution/DistributionAPI'
 export * from './common/distribution/DistributionFactory'
 export * from './common/distribution/DistributionError'
+export * from './common/distribution/InstallerTypes'
 export * from './common/rest/RestResponse'
 export * from './common/util/DistroUtils'
 export * from './common/util/FileUtils'

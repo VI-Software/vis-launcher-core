@@ -92,7 +92,11 @@ export class FullRepairReceiver implements Receiver {
                 log.debug('Body:', error.response.body)
                 log.debug('Headers:', error.response.headers)
 
-                return `Error during request (HTTP Response ${error.response.statusCode})`
+                const requestUrl = error?.request?.requestUrl ?? 'unknown url'
+                if(error.response.statusCode === 404) {
+                    return `A file required by the server was not found on the distribution server (HTTP 404): ${requestUrl}. If this problem persists, contact the server admin and report this path.`
+                }
+                return `Error during request (HTTP Response ${error.response.statusCode}): ${requestUrl}`
             } else if(error.name === 'RequestError') {
                 return `Request received no response (${error.code}).`
             } else if(error instanceof TimeoutError) {
@@ -106,7 +110,8 @@ export class FullRepairReceiver implements Receiver {
                 return 'Error during request.'
             }
         } else {
-            return undefined
+            // Last resort so the launch failure dialog always carries context.
+            return error instanceof Error ? error.message : undefined
         }
     }
 
